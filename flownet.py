@@ -192,15 +192,13 @@ class SuperSource(FlowNode):
 
 class FlowNetwork(object):
     """
-    A class for flow network functionality. This class is primarily
-    used to solve the maximum source to sink flow for the FlowNode
-    class.
+    A class for flow network functionality. Flow networks created with this
+    class automatically reduce the network size by using one sink and one
+    source.
 
     Attributes:
         node_key_dict (OrderedDict[key, FlowNode]): The dict of all created
             nodes.
-        _source (SuperSource): The only source node.
-        _sink (SuperSink): The only sink node.
 
     """
     def __init__(self):
@@ -219,24 +217,6 @@ class FlowNetwork(object):
         """SuperSink: The only sink node."""
         return self._sink
 
-    def add_node(self, node):
-        """Adds a node to this graph.
-
-        Args:
-            node (FlowNode): The node to add.
-
-
-        """
-        if node is self.source or node is self.sink:
-            return
-        elif isinstance(node, (SuperSink, SuperSource)):
-            raise ValueError("Cannot add SuperSink or SuperSource node : {}"
-                             "".format(node))
-        if node.key in self.node_key_dict:
-            raise KeyError("Node already added: Cannot add {}."
-                           "".format(node))
-        self.node_key_dict[node.key] = node
-
     def add_flow_edge(self, parent, child, capacity):
         """
         Adds a a flow from a parent node to a child node.
@@ -251,18 +231,14 @@ class FlowNetwork(object):
             capacity (int): The max amount of flow to add.
 
         """
-        if not isinstance(parent, FlowNode):
-            if parent not in self.node_key_dict:
-                self.node_key_dict[parent] = FlowNode(parent)
-            parent = self.node_key_dict[parent]
-        elif parent.key not in self.node_key_dict:
-            self.add_node(parent)
-        if not isinstance(child, FlowNode):
-            if child not in self.node_key_dict:
-                self.node_key_dict[child] = FlowNode(child)
-            child = self.node_key_dict[child]
-        elif child.key not in self.node_key_dict:
-            self.add_node(child)
+        if isinstance(parent, FlowNode) or isinstance(child, FlowNode):
+            raise TypeError("add_flow_edge args are node keys, not nodes themselves.")
+        if parent not in self.node_key_dict:
+            self.node_key_dict[parent] = FlowNode(parent)
+        parent = self.node_key_dict[parent]
+        if child not in self.node_key_dict:
+            self.node_key_dict[child] = FlowNode(child)
+        child = self.node_key_dict[child]
         parent.add_flow(child, capacity)
 
     def get_maximum_flow(self):
@@ -384,7 +360,7 @@ class FlowNetwork(object):
             for next_node_idx in xrange(size):
                 next_node = key_to_node[next_node_idx]
                 capacity = row[next_node_idx]
-                flow_network.add_flow_edge(node, next_node, capacity)
+                flow_network.add_flow_edge(node.key, next_node.key, capacity)
         return flow_network
 
     @classmethod
@@ -408,7 +384,7 @@ class FlowNetwork(object):
                 if node_2 not in node.edge_flow:
                     txt = "0"
                     if node is self.sink:
-                        txt = str(node.consumed)
+                        txt = str(node.key)
                 else:
                     txt = str(node.edge_flow[node_2])
                 node_strings.append(txt)
@@ -417,7 +393,7 @@ class FlowNetwork(object):
             if node is self.source:
                 node_string += " Source"
             elif node is self.sink:
-                node_string += " Sink"
+                node_string += " Sink ({})".format(self.sink.consumed)
             else:
                 node_string += " {}".format(node.key)
             all_strings.append(node_string)
