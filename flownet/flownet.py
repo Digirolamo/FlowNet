@@ -61,6 +61,8 @@ class FlowNode(object):
             amount (int): The amount of flow to add.
 
         """
+        if child is self:
+            raise ValueError("Cannot add flow to self.")
         if child not in self.edge_flow:
             self.edge_flow[child] = amount
             child._parents.add(weakref.ref(self))
@@ -80,6 +82,8 @@ class FlowNode(object):
                 of the edge)
 
         """
+        if child is self:
+            raise ValueError("Cannot remove flow from self.")
         if amount < self.edge_flow[child]:
             self.edge_flow[child] -= amount
         else:
@@ -359,6 +363,8 @@ class FlowNetwork(object):
             node = key_to_node[node_idx]
             for next_node_idx in xrange(size):
                 next_node = key_to_node[next_node_idx]
+                if node is next_node:
+                    continue
                 capacity = row[next_node_idx]
                 flow_network.add_flow_edge(node.key, next_node.key, capacity)
         return flow_network
@@ -384,15 +390,15 @@ class FlowNetwork(object):
         for node in self.node_key_dict.itervalues():
             node_strings = []
             for node_2 in self.node_key_dict.itervalues():
-                if node_2 not in node.edge_flow:
+                if  node_2 is node or node is self.sink:
+                    txt = f_temp.format('-')
+                elif node_2 not in node.edge_flow:
                     txt = f_temp.format(0)
-                    if node is self.sink:
-                        txt = f_temp.format(node.key)
                 else:
                     txt = f_temp.format(node.edge_flow[node_2])
                 node_strings.append(txt)
             node_string = ", ".join(node_strings)
-            node_string = "[{}]".format(node_string)
+            node_string = "[{}], #".format(node_string)
             if node is self.source:
                 node_string += " Source"
             elif node is self.sink:
@@ -400,6 +406,8 @@ class FlowNetwork(object):
             else:
                 node_string += " {}".format(node.key)
             all_strings.append(node_string)
-        entire_string = ",\n ".join(all_strings)
-        entire_string = "[{}]".format(entire_string)
+        if all_strings:
+            all_strings[-1] = all_strings[-1].replace("], #", "]] #")
+        entire_string = "\n ".join(all_strings)
+        entire_string = "[{}".format(entire_string)
         return entire_string
