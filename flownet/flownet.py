@@ -377,16 +377,19 @@ class FlowNetwork(object):
         return new_flow_network
 
     def __str__(self):
+        max_num = max(e[2] for e in self.iter_edge_values())
+        largest_str = len(str(max_num))
+        f_temp = " {:" + str(largest_str) + "}"
         all_strings = []
         for node in self.node_key_dict.itervalues():
             node_strings = []
             for node_2 in self.node_key_dict.itervalues():
                 if node_2 not in node.edge_flow:
-                    txt = "0"
+                    txt = f_temp.format(0)
                     if node is self.sink:
-                        txt = str(node.key)
+                        txt = f_temp.format(node.key)
                 else:
-                    txt = str(node.edge_flow[node_2])
+                    txt = f_temp.format(node.edge_flow[node_2])
                 node_strings.append(txt)
             node_string = ", ".join(node_strings)
             node_string = "[{}]".format(node_string)
