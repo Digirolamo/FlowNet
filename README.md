@@ -1,5 +1,5 @@
 # FlowNet
-A python library for simple flow networks. Automatically reduces the network size when multiple sinks and sources are used.
+A python library for simple flow networks. Automatically reduces flow network sizes when multiple sinks and sources are specified. Works with adjacency matrix representations.
 
 Here is a example:
 
@@ -17,6 +17,7 @@ Here is a example:
         [82, 35, 66, 39, 55, 36, 48, 10],
         [68, 17, 30, 23, 44, 65, 16, 52]
         ]
+
     >>> flow_network = FlowNetwork.from_adjacency_matrix(adj_matrix, sources, sinks)
     >>> print(flow_network)
     [[ 44,  21,  38,  84,  30,  76,  98,  49] Source,
@@ -27,7 +28,7 @@ Here is a example:
      [ 15,  48,  24,  19,  12,  76,  68,  28] 5,
      [ 82,  35,  66,  39,  55,  36,  48,  10] 6,
      [ 68,  17,  30,  23,  44,  65,  16,  52] 7]
-     >>> print(flow_network.get_maximum_flow())
+     >>> flow_network.get_maximum_flow()
     313
 
     >>> sources = [6, 3, 2]
@@ -39,5 +40,5 @@ Here is a example:
      [ 196,  172,   54,   91,   58] 4,
      [ 111,   63,   12,   76,   28] 5,
      [  69,   85,   44,   65,   52] 7]
-    >>> print(flow_network.get_maximum_flow())
+    >>> flow_network.get_maximum_flow()
     691
