@@ -23,8 +23,6 @@ class FlowNode(object):
 
     Args:
         key (int): A unique identifier for the node.
-        is_source (bool): Whether this is a source node in a flow network.
-        is_sink (bool): Whether this is a sink node in a flow network.
 
     Attributes:
         key (int): A unique identifier for the node.
@@ -44,7 +42,7 @@ class FlowNode(object):
 
     @property
     def flow(self):
-        """int: The total capacity flow from this FlowNode."""
+        """int: The total flow from this FlowNode."""
         return sum(self.edge_flow.itervalues())
 
     @property
@@ -192,44 +190,22 @@ class SuperSource(FlowNode):
     
     """
     
+    
 class FlowNetwork(object):
     """
     A class for flow network functionality. This class is primarily
     used to solve the maximum source to sink flow for the FlowNode
     class.
 
-    Args:
-        node_key_dict (OrderedDict[key, FlowNode]): The dict of non-super nodes.
-        source (SuperSource, optional): The only source node. Defaults to None,
-            where we create the node itself.
-        sink (SuperSink, optional): The only sink node. Defaults to None,
-            where we create the node itself.
-            
     Attributes:
         node_key_dict (OrderedDict[key, FlowNode]): The dict of all created nodes.
         _source (SuperSource): The only source node.
         _sink (SuperSink): The only sink node.
 
     """
-    def __init__(self, source=None, sink=None):
-        if source is None:
-            self._source = SuperSource(INF)
-        else:
-            if isinstance(source, SuperSource):
-                self._source = source
-            else:
-                raise ValueError("Args source must be SuperSource, not {}."
-                                "".format(type(source)))
-        if sink is None:
-            self._sink = SuperSink(-1)
-        else:
-            if isinstance(sink, SuperSink):
-                self._sink = sink
-            else:
-                raise ValueError("Args source must be SuperSink, not {}."
-                                "".format(type(sink)))
-        self._source = SuperSource(INF)
-        self._sink = SuperSink(-1)
+    def __init__(self):
+        self._source = SuperSource("+")
+        self._sink = SuperSink("-")
         d = [(self.source.key, self.source), (self.sink.key, self.sink)]
         self.node_key_dict = OrderedDict(d)
         
@@ -243,16 +219,6 @@ class FlowNetwork(object):
         """SuperSink: The only sink node."""
         return self._sink
     
-    @property
-    def size(self):
-        """int: The amount of nodes in the flow graph."""
-        return len(self.node_key_dict)
-
-    @property
-    def consumed(self):
-        """int: The number of flow units consumed by the sink."""
-        return self.sink.consumed
-
     def add_node(self, node):
         """Adds a node to this graph.
         
@@ -271,16 +237,16 @@ class FlowNetwork(object):
                           "".format(node))
         self.node_key_dict[node.key] = node
         
-    def add_flow(self, parent, child, capacity):
+    def add_flow_edge(self, parent, child, capacity):
         """
         Adds a a flow from a parent node to a child node.
         If the node and edge already exists, adds to it, else
         we create a new node and/or edge.
 
         Args:
-            parent (object): The child who receives
-                flow from this node.
-            child (FlowNode): The child who receives
+            parent (str): The key of the parent who is sending the
+                flow.
+            child (str): The key of the child who receives
                 flow from this node.
             capacity (int): The max amount of flow to add.
 
@@ -300,11 +266,16 @@ class FlowNetwork(object):
         parent.add_flow(child, capacity)
         
     def get_maximum_flow(self):
-        """"""
+        """Gets the maximum flow from source to sink.
+        
+        Returns:
+            int: The maximum flow.
+            
+        """
         new_copy = self.from_flow_network(self)
-        start_consumed = new_copy.consumed
+        start_consumed = new_copy.sink.consumed
         new_copy.send_max_flow_to_sink()
-        return new_copy.consumed - start_consumed
+        return new_copy.sink.consumed - start_consumed
         
         
     def send_max_flow_to_sink(self):
@@ -453,4 +424,3 @@ class FlowNetwork(object):
         entire_string = ",\n ".join(all_strings)
         entire_string = "[{}]".format(entire_string)
         return entire_string
-
