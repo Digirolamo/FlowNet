@@ -3,7 +3,7 @@ import codecs
 import json
 import os
 from setuptools import setup
-    
+ 
 
 package_name = "flownet"
 packages  = [package_name,]
@@ -15,6 +15,11 @@ with codecs.open(version_path) as f:
 with codecs.open('README.md', 'r', 'utf-8') as f:
     readme = f.read()
 
+def find_tests():
+    import unittest
+    test_loader = unittest.TestLoader()
+    test_suite = test_loader.discover(package_name, pattern='*_test.py')
+    return test_suite   
 
 setup(
     name = "flownet",
@@ -32,7 +37,7 @@ setup(
         },
     package_dir={package_name: package_name},
     include_package_data=True,
-    test_suite='tests',
+    test_suite='setup.find_tests',
     install_requires=['six>=1.8.0'],
     classifiers=[
         'Development Status :: 3 - Alpha',

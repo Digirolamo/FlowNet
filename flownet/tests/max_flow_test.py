@@ -1,7 +1,7 @@
 """This module contains the general flownet tests.
 
 """
-from unittest import TestCase
+from unittest import TestCase, TestSuite, TextTestRunner
 from flownet import FlowNetwork
 
 
@@ -44,7 +44,7 @@ class MaxFlowTestCases(TestCase):
 
     def test_max3(self):
         sources = [0, 3, 13, 1, 7, 15, 5]
-        sinks = [11, 14, 10, 9, 2, 12, 17, 16, 19],
+        sinks = [11, 14, 10, 9, 2, 12, 17, 16, 19]
         adj_matrix = [
             [1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
             [1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1],
