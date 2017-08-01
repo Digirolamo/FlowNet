@@ -1,10 +1,48 @@
 # FlowNet
 A python library for simple flow networks. Automatically reduces flow network sizes when multiple sinks and sources are specified. Works with adjacency matrix representations.
 
-Here is a example:
+Here are a few examples:
 
 
     >>> from flownet import FlowNetwork
+    
+    #  Example 1: creating a flow network via edge ids.
+    >>> flow_network = FlowNetwork()
+    >>> source_id, sink_id = flow_network.get_source_sink_ids()
+    >>> flow_network.add_flow_edge(source_id, "A", 6)
+    >>> flow_network.add_flow_edge(source_id, "B", 2)
+    >>> flow_network.add_flow_edge("A", "C", 1)
+    >>> flow_network.add_flow_edge("B", "C", 2)
+    >>> flow_network.add_flow_edge("C", sink_id, 4)
+    >>> print(flow_network)
+    [[ -,  0,  6,  2,  0], # Source
+     [ -,  -,  -,  -,  -], # Sink (0)
+     [ 0,  0,  -,  0,  1], # A
+     [ 0,  0,  0,  -,  2], # B
+     [ 0,  4,  0,  0,  -]] # C
+
+    >>> source = flow_network.get_node(source_id)  # Is also flow_network.source
+    >>> source.flow
+    8
+    >>> list(source.iter_edges())
+    [(SuperSource(+), FlowNode(A), 6), (SuperSource(+), FlowNode(B), 2)]
+
+    >>> a_node = flow_network.get_node('A')
+    >>> a_node.flow
+    1
+    >>> list(a_node.iter_edges())
+    [(FlowNode(A), FlowNode(C), 1)]
+
+    >>> c_node = flow_network.get_node('C')
+    >>> c_node.flow
+    4
+    >>> list(c_node.iter_edges())
+    [(FlowNode(C), SuperSink(-), 4)]
+
+    >>> flow_network.get_maximum_flow()
+    3
+
+    #  Examples 2 and 3: creating flow networks from an adjacency matrix.
     >>> adj_matrix = [
         [44, 21, 38, 84, 30, 76, 98, 49],
         [37, 11, 87, 68, 34, 57, 77, 16],

@@ -221,6 +221,27 @@ class FlowNetwork(object):
         """SuperSink: The only sink node."""
         return self._sink
 
+    def get_source_sink_ids(self):
+        """Gets the source and sink ids.
+
+        Returns:
+            tuple[FlowNode]: The source and sink.
+
+        """
+        return self.source.key, self.sink.key
+
+    def get_node(self, node_id):
+        """Gets the node from an id.
+
+        Args:
+            node_id (str): The unique id of the node.
+
+        Returns:
+            FlowNode: The node.
+
+        """
+        return self.node_key_dict[node_id]
+
     def add_flow_edge(self, parent, child, capacity):
         """
         Adds a a flow from a parent node to a child node.
@@ -324,8 +345,6 @@ class FlowNetwork(object):
         """
         visited = set()
         for node in self.node_key_dict.values():
-            if node in visited:
-                continue
             for parent, child in node.iter_dfs_edges():
                 edge = (parent, child)
                 if edge in visited:
